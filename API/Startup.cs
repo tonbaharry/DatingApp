@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Interfaces;
+using API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -13,28 +15,31 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using API.Extensions;
 
 namespace API
 {
     public class Startup
     {
-        private readonly IConfiguration _config;
+        
         public Startup(IConfiguration config)
         {
             _config = config;
         }
-
-        public IConfiguration Configuration { get; }
+        public IConfiguration _config { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DataContext>(options=>
-            {
-                options.UseSqlServer(_config.GetConnectionString("DefaultConnection"));
-            });
+            //created a file in Extensions folder to handle this
+            //to reduce the amount of code on startup.cs
+            services.AddApplicationServices(_config);
             services.AddControllers();
             services.AddCors();
+            services.AddIdentityServices(_config);
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
@@ -56,6 +61,7 @@ namespace API
             app.UseRouting();
              //CORS must be placed between UseRouting and UseAuthorization
             app.UseCors(policy => policy.AllowAnyMethod().WithOrigins("https://localhost:4200"));
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
