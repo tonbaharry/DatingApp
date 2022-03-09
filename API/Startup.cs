@@ -60,7 +60,7 @@ namespace API
 
             app.UseRouting();
              //CORS must be placed between UseRouting and UseAuthorization
-            app.UseCors(policy => policy.AllowAnyMethod().WithOrigins("https://localhost:4200"));
+            app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200"));
             app.UseAuthentication();
             app.UseAuthorization();
 
